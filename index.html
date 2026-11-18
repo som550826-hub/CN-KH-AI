@@ -3,90 +3,156 @@
 <html lang="km">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>CN-KH AI</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#101827;color:white;font-family:Arial,sans-serif;padding:18px}
-header{text-align:center;padding:20px}
-header h1{color:#38d9ff;font-size:30px}
-.card{background:#1e293b;padding:18px;border-radius:15px;margin:15px 0}
-label{display:block;margin:12px 0 7px}
-textarea{width:100%;height:120px;background:#0f172a;color:white;border:1px solid #475569;border-radius:10px;padding:12px;font-size:16px}
-button{width:100%;padding:14px;border:0;border-radius:10px;background:#0891b2;color:white;font-size:17px;margin-top:12px;font-weight:bold}
-button:active{opacity:.7}
-input{width:100%;padding:12px;background:#0f172a;color:white;border-radius:8px}
-.output{background:#0f172a;padding:15px;border-radius:10px;min-height:70px;overflow-wrap:anywhere}
-small{color:#94a3b8}
+body{margin:0;background:#101827;color:white;font-family:Arial,sans-serif;padding:16px}
+.wrap{max-width:680px;margin:auto}
+header{text-align:center;padding:12px}
+h1{color:#38d9ff}
+.card{background:#1e293b;padding:16px;border-radius:15px;margin:14px 0}
+input,textarea{width:100%;background:#0f172a;color:white;border:1px solid #475569;border-radius:10px;padding:12px;font-size:16px}
+button{width:100%;padding:14px;border:0;border-radius:10px;background:#0891b2;color:white;font-size:16px;font-weight:bold;margin-top:10px}
+button:disabled{opacity:.5}
+small,.muted{color:#a8b6c8}
+.progress{height:14px;background:#0f172a;border-radius:20px;overflow:hidden;margin:12px 0}
+.bar{height:100%;width:0;background:#22c55e;transition:width .3s}
+.output{white-space:pre-wrap;overflow-wrap:anywhere;background:#0f172a;padding:14px;border-radius:10px;min-height:60px}
+video{width:100%;max-height:260px;margin-top:12px;border-radius:10px}
+a{color:#67e8f9;display:inline-block;margin-top:12px}
 </style>
 </head>
 <body>
+<div class="wrap">
 <header>
 <h1>🇨🇳 CN-KH AI 🇰🇭</h1>
-<p>កម្មវិធីបកប្រែភាសាចិនទៅភាសាខ្មែរ</p>
-<small>AI Chinese to Khmer Translation Studio</small>
+<p>កម្មវិធីបកប្រែវីដេអូចិនទៅខ្មែរ</p>
+<small>Chinese → Khmer Video Translation</small>
 </header>
 
 <div class="card">
-<h3>🎬 បញ្ចូលវីដេអូ</h3>
-<input type="file" id="video" accept="video/*">
+<h3>🎬 ១. ជ្រើសរើសវីដេអូ</h3>
+<input id="video" type="file" accept="video/*">
+<p id="fileInfo" class="muted">សូមជ្រើសរើសវីដេអូពីទូរស័ព្ទ</p>
+<video id="preview" controls hidden></video>
 </div>
 
 <div class="card">
-<h3>📝 បញ្ចូលអត្ថបទភាសាចិន</h3>
-<textarea id="source" placeholder="សូមបញ្ចូលអត្ថបទភាសាចិននៅទីនេះ..."></textarea>
-<button onclick="translateText()">🌐 បកប្រែទៅជាភាសាខ្មែរ</button>
+<h3>🌐 ២. ភ្ជាប់ Server</h3>
+<input id="api" type="url" placeholder="https://your-server.onrender.com">
+<small>បញ្ចូល URL Server របស់ CN-KH AI</small>
 </div>
 
 <div class="card">
-<h3>🇰🇭 លទ្ធផលភាសាខ្មែរ</h3>
-<div class="output" id="result">លទ្ធផលបកប្រែនឹងបង្ហាញនៅទីនេះ...</div>
-<button onclick="speakKhmer()">🔊 ស្តាប់សំឡេងខ្មែរ</button>
+<h3>🚀 ៣. ចាប់ផ្តើមបកប្រែ</h3>
+<button id="start">ចាប់ផ្តើមបកប្រែវីដេអូ</button>
+<div class="progress"><div id="bar" class="bar"></div></div>
+<p id="percent">0%</p>
+<p id="status">រង់ចាំវីដេអូ...</p>
 </div>
 
 <div class="card">
-<h3>🎙️ សំឡេង</h3>
-<p>មុខងារស្តាប់សំឡេងតាមប្រព័ន្ធទូរស័ព្ទ</p>
-<button onclick="listen()">🎤 និយាយដើម្បីបញ្ចូលអត្ថបទ</button>
+<h3>🇰🇭 ៤. លទ្ធផលបកប្រែខ្មែរ</h3>
+<div id="transcript" class="output">លទ្ធផលនឹងបង្ហាញនៅទីនេះ។</div>
+<a id="audioLink" hidden download="CN-KH-Khmer-Audio.mp3">⬇️ ទាញយកសំឡេងខ្មែរ MP3</a>
 </div>
 
-<footer style="text-align:center;padding:20px;color:#94a3b8">
-CN-KH AI © 2026
-</footer>
+<div class="card">
+<h3>📝 ៥. បកប្រែអត្ថបទចិន</h3>
+<textarea id="source" placeholder="បញ្ចូលអត្ថបទភាសាចិន..."></textarea>
+<button id="translateText">បកប្រែទៅខ្មែរ</button>
+<div id="textResult" class="output">លទ្ធផលបកប្រែ...</div>
+</div>
+</div>
 
 <script>
-async function translateText(){
- const text=document.getElementById('source').value.trim();
- if(!text){alert('សូមបញ្ចូលអត្ថបទជាមុន');return;}
- const result=document.getElementById('result');
- result.innerText='កំពុងបកប្រែ...';
+const $=id=>document.getElementById(id);
+let selected=null,poll=null;
+
+$('video').addEventListener('change',()=>{
+ selected=$('video').files[0];
+ if(!selected)return;
+ $('fileInfo').textContent=selected.name+' • '+(selected.size/1048576).toFixed(1)+' MB';
+ $('preview').src=URL.createObjectURL(selected);
+ $('preview').hidden=false;
+});
+
+function progress(p,message){
+ p=Math.max(0,Math.min(100,Number(p)||0));
+ $('bar').style.width=p+'%';
+ $('percent').textContent=Math.round(p)+'%';
+ $('status').textContent=message||'កំពុងដំណើរការ...';
+}
+
+$('start').onclick=async()=>{
+ if(!selected){alert('សូមជ្រើសរើសវីដេអូជាមុន');return;}
+ const base=$('api').value.trim().replace(/\/+$/,'');
+ if(!/^https?:\/\//i.test(base)){alert('សូមបញ្ចូល Server URL ជាមុន');return;}
+
+ $('start').disabled=true;
+ $('transcript').textContent='កំពុងផ្ញើវីដេអូទៅ Server...';
+ $('audioLink').hidden=true;
+ progress(2,'កំពុងផ្ញើវីដេអូ...');
+
  try{
-  const url='https://api.mymemory.translated.net/get?q='+encodeURIComponent(text)+'&langpair=zh-CN|km';
-  const response=await fetch(url);
-  const data=await response.json();
-  result.innerText=data.responseData.translatedText || 'មិនអាចបកប្រែបានទេ';
+  const fd=new FormData();
+  fd.append('file',selected);
+  const r=await fetch(base+'/jobs',{method:'POST',body:fd});
+  const data=await r.json();
+  if(!r.ok)throw new Error(data.detail||'Upload failed');
+
+  progress(5,'បានទទួលវីដេអូ។ កំពុងដំណើរការ...');
+  poll=setInterval(async()=>{
+   try{
+    const q=await fetch(base+'/jobs/'+data.id);
+    const d=await q.json();
+    if(!q.ok)throw new Error(d.detail||'Status error');
+    progress(d.progress,d.message);
+
+    if(d.status==='completed'){
+     clearInterval(poll);
+     $('transcript').textContent=d.transcript||'មិនមានអត្ថបទ';
+     $('audioLink').href=base+'/jobs/'+data.id+'/audio';
+     $('audioLink').hidden=false;
+     $('start').disabled=false;
+    }
+    if(d.status==='failed'){
+     clearInterval(poll);
+     $('transcript').textContent=d.error||'ការបកប្រែបរាជ័យ';
+     $('start').disabled=false;
+    }
+   }catch(e){
+    clearInterval(poll);
+    progress(0,e.message);
+    $('start').disabled=false;
+   }
+  },3000);
  }catch(e){
-  result.innerText='មិនអាចភ្ជាប់សេវាបកប្រែបានទេ។ សូមពិនិត្យអ៊ីនធឺណិត។';
+  progress(0,'មានបញ្ហា៖ '+e.message);
+  $('start').disabled=false;
  }
-}
-function speakKhmer(){
- const text=document.getElementById('result').innerText;
- if(!text){return;}
- const speech=new SpeechSynthesisUtterance(text);
- speech.lang='km-KH';
- speech.rate=0.85;
- speechSynthesis.speak(speech);
-}
-function listen(){
- const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
- if(!SpeechRecognition){alert('ទូរស័ព្ទនេះមិនគាំទ្រមុខងារសម្គាល់សំឡេងទេ');return;}
- const recognition=new SpeechRecognition();
- recognition.lang='zh-CN';
- recognition.onresult=e=>{
- document.getElementById('source').value=e.results[0][0].transcript;
- };
- recognition.start();
-}
+};
+
+$('translateText').onclick=async()=>{
+ const t=$('source').value.trim();
+ const base=$('api').value.trim().replace(/\/+$/,'');
+ if(!t){$('textResult').textContent='សូមបញ្ចូលអត្ថបទចិន';return;}
+ if(!base){$('textResult').textContent='សូមបញ្ចូល Server URL';return;}
+ try{
+  $('textResult').textContent='កំពុងបកប្រែ...';
+  const r=await fetch(base+'/translate',{
+   method:'POST',
+   headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({text:t})
+  });
+  const d=await r.json();
+  if(!r.ok)throw new Error(d.detail||'Translation failed');
+  $('textResult').textContent=d.translation;
+ }catch(e){
+  $('textResult').textContent='បកប្រែមិនបាន៖ '+e.message;
+ }
+};
 </script>
 </body>
 </html>
