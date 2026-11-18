@@ -1,0 +1,52 @@
+
+<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CN-KH AI</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:20px;background:#101827;color:white;font-family:Arial,sans-serif}
+.container{max-width:600px;margin:auto}
+h1{text-align:center;color:#39d5ff}
+textarea{width:100%;height:130px;padding:14px;border-radius:12px;font-size:18px}
+button{width:100%;padding:15px;margin:8px 0;border:0;border-radius:12px;background:#087cff;color:white;font-size:18px}
+.result{background:#202d40;padding:15px;border-radius:12px;min-height:90px;font-size:20px;overflow-wrap:anywhere}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>🇨🇳 CN-KH AI 🇰🇭</h1>
+<p>កម្មវិធីបកប្រែភាសាចិនទៅខ្មែរ</p>
+<textarea id="chinese" placeholder="បញ្ចូលអត្ថបទភាសាចិន..."></textarea>
+<button onclick="translateText()">🌐 បកប្រែទៅខ្មែរ</button>
+<div class="result" id="result">លទ្ធផលបកប្រែនឹងបង្ហាញនៅទីនេះ</div>
+<button onclick="speakKhmer()">🔊 អានសំឡេងខ្មែរ</button>
+</div>
+<script>
+async function translateText(){
+const input=document.getElementById("chinese").value.trim();
+const result=document.getElementById("result");
+if(!input){result.innerText="សូមបញ្ចូលអត្ថបទភាសាចិន";return;}
+result.innerText="កំពុងបកប្រែ...";
+try{
+const url="https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-CN&tl=km&dt=t&q="+encodeURIComponent(input);
+const response=await fetch(url);
+const data=await response.json();
+result.innerText=data[0].map(x=>x[0]).join("");
+}catch(e){result.innerText="បកប្រែមិនបានទេ សូមពិនិត្យ Internet";}
+}
+function speakKhmer(){
+const text=document.getElementById("result").innerText;
+if(!text)return;
+if(!("speechSynthesis" in window)){alert("ទូរស័ព្ទមិនគាំទ្រសំឡេងនេះទេ");return;}
+speechSynthesis.cancel();
+const speech=new SpeechSynthesisUtterance(text);
+speech.lang="km-KH";
+speech.rate=0.85;
+speechSynthesis.speak(speech);
+}
+</script>
+</body>
+</html>
