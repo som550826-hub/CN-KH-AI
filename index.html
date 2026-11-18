@@ -1,0 +1,92 @@
+
+<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CN-KH AI</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#101827;color:white;font-family:Arial,sans-serif;padding:18px}
+header{text-align:center;padding:20px}
+header h1{color:#38d9ff;font-size:30px}
+.card{background:#1e293b;padding:18px;border-radius:15px;margin:15px 0}
+label{display:block;margin:12px 0 7px}
+textarea{width:100%;height:120px;background:#0f172a;color:white;border:1px solid #475569;border-radius:10px;padding:12px;font-size:16px}
+button{width:100%;padding:14px;border:0;border-radius:10px;background:#0891b2;color:white;font-size:17px;margin-top:12px;font-weight:bold}
+button:active{opacity:.7}
+input{width:100%;padding:12px;background:#0f172a;color:white;border-radius:8px}
+.output{background:#0f172a;padding:15px;border-radius:10px;min-height:70px;overflow-wrap:anywhere}
+small{color:#94a3b8}
+</style>
+</head>
+<body>
+<header>
+<h1>🇨🇳 CN-KH AI 🇰🇭</h1>
+<p>កម្មវិធីបកប្រែភាសាចិនទៅភាសាខ្មែរ</p>
+<small>AI Chinese to Khmer Translation Studio</small>
+</header>
+
+<div class="card">
+<h3>🎬 បញ្ចូលវីដេអូ</h3>
+<input type="file" id="video" accept="video/*">
+</div>
+
+<div class="card">
+<h3>📝 បញ្ចូលអត្ថបទភាសាចិន</h3>
+<textarea id="source" placeholder="សូមបញ្ចូលអត្ថបទភាសាចិននៅទីនេះ..."></textarea>
+<button onclick="translateText()">🌐 បកប្រែទៅជាភាសាខ្មែរ</button>
+</div>
+
+<div class="card">
+<h3>🇰🇭 លទ្ធផលភាសាខ្មែរ</h3>
+<div class="output" id="result">លទ្ធផលបកប្រែនឹងបង្ហាញនៅទីនេះ...</div>
+<button onclick="speakKhmer()">🔊 ស្តាប់សំឡេងខ្មែរ</button>
+</div>
+
+<div class="card">
+<h3>🎙️ សំឡេង</h3>
+<p>មុខងារស្តាប់សំឡេងតាមប្រព័ន្ធទូរស័ព្ទ</p>
+<button onclick="listen()">🎤 និយាយដើម្បីបញ្ចូលអត្ថបទ</button>
+</div>
+
+<footer style="text-align:center;padding:20px;color:#94a3b8">
+CN-KH AI © 2026
+</footer>
+
+<script>
+async function translateText(){
+ const text=document.getElementById('source').value.trim();
+ if(!text){alert('សូមបញ្ចូលអត្ថបទជាមុន');return;}
+ const result=document.getElementById('result');
+ result.innerText='កំពុងបកប្រែ...';
+ try{
+  const url='https://api.mymemory.translated.net/get?q='+encodeURIComponent(text)+'&langpair=zh-CN|km';
+  const response=await fetch(url);
+  const data=await response.json();
+  result.innerText=data.responseData.translatedText || 'មិនអាចបកប្រែបានទេ';
+ }catch(e){
+  result.innerText='មិនអាចភ្ជាប់សេវាបកប្រែបានទេ។ សូមពិនិត្យអ៊ីនធឺណិត។';
+ }
+}
+function speakKhmer(){
+ const text=document.getElementById('result').innerText;
+ if(!text){return;}
+ const speech=new SpeechSynthesisUtterance(text);
+ speech.lang='km-KH';
+ speech.rate=0.85;
+ speechSynthesis.speak(speech);
+}
+function listen(){
+ const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SpeechRecognition){alert('ទូរស័ព្ទនេះមិនគាំទ្រមុខងារសម្គាល់សំឡេងទេ');return;}
+ const recognition=new SpeechRecognition();
+ recognition.lang='zh-CN';
+ recognition.onresult=e=>{
+ document.getElementById('source').value=e.results[0][0].transcript;
+ };
+ recognition.start();
+}
+</script>
+</body>
+</html>
