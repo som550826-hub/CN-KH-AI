@@ -14,8 +14,8 @@ import android.webkit.WebViewClient;
 public class MainActivity extends Activity {
 
     private static final int FILE_CHOOSER_REQUEST = 1001;
-    private ValueCallback<Uri[]> filePathCallback;
 
+    private ValueCallback<Uri[]> filePathCallback;
     private WebView webView;
 
     @Override
@@ -28,6 +28,7 @@ public class MainActivity extends Activity {
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
         settings.setAllowFileAccess(true);
+        settings.setAllowContentAccess(true);
         settings.setMediaPlaybackRequiresUserGesture(false);
 
         webView.setWebViewClient(new WebViewClient());
@@ -47,11 +48,16 @@ public class MainActivity extends Activity {
                 filePathCallback = callback;
 
                 try {
-                    Intent intent = params.createIntent();
+                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                    intent.addCategory(Intent.CATEGORY_OPENABLE);
+                    intent.setType("video/*");
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
                     startActivityForResult(
-                        intent,
-                        FILE_CHOOSER_REQUEST
+                            intent,
+                            FILE_CHOOSER_REQUEST
                     );
+
                 } catch (Exception e) {
                     filePathCallback.onReceiveValue(null);
                     filePathCallback = null;
@@ -63,9 +69,7 @@ public class MainActivity extends Activity {
 
         setContentView(webView);
 
-        webView.loadUrl(
-            "file:///android_asset/index.html"
-        );
+        webView.loadUrl("file:///android_asset/index.html");
     }
 
     @Override
@@ -74,11 +78,7 @@ public class MainActivity extends Activity {
             int resultCode,
             Intent data) {
 
-        super.onActivityResult(
-            requestCode,
-            resultCode,
-            data
-        );
+        super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == FILE_CHOOSER_REQUEST) {
 
@@ -89,15 +89,10 @@ public class MainActivity extends Activity {
             Uri[] results = null;
 
             if (resultCode == Activity.RESULT_OK && data != null) {
+                Uri uri = data.getData();
 
-                Uri result =
-                    WebChromeClient.FileChooserParams.parseResult(
-                        resultCode,
-                        data
-                    );
-
-                if (result != null) {
-                    results = new Uri[]{result};
+                if (uri != null) {
+                    results = new Uri[]{uri};
                 }
             }
 
@@ -112,6 +107,10 @@ public class MainActivity extends Activity {
         if (filePathCallback != null) {
             filePathCallback.onReceiveValue(null);
             filePathCallback = null;
+        }
+
+        if (webView != null) {
+            webView.destroy();
         }
 
         super.onDestroy();
