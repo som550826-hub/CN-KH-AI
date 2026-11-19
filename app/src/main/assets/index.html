@@ -4,10 +4,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CN-KH AI</title>
+<title>CN-KH AI PRO</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#101827;color:white;font-family:Arial,sans-serif;padding:16px}
+body{margin:0;background:#101827;color:white;font-family:Arial,sans-serif;padding:15px}
 .wrap{max-width:680px;margin:auto}
 header{text-align:center;padding:12px}
 h1{color:#38d9ff}
@@ -16,17 +16,19 @@ input,textarea{width:100%;background:#0f172a;color:white;border:1px solid #47556
 button{width:100%;padding:14px;border:0;border-radius:10px;background:#0891b2;color:white;font-size:16px;font-weight:bold;margin-top:10px}
 button:disabled{opacity:.5}
 small,.muted{color:#a8b6c8}
-.progress{height:14px;background:#0f172a;border-radius:20px;overflow:hidden;margin:12px 0}
+.progress{height:16px;background:#0f172a;border-radius:20px;overflow:hidden;margin:12px 0}
 .bar{height:100%;width:0;background:#22c55e;transition:width .3s}
 .output{white-space:pre-wrap;overflow-wrap:anywhere;background:#0f172a;padding:14px;border-radius:10px;min-height:60px}
-video{width:100%;max-height:260px;margin-top:12px;border-radius:10px}
-a{color:#67e8f9;display:inline-block;margin-top:12px}
+video{width:100%;max-height:300px;margin-top:12px;border-radius:10px;background:black}
+a{color:#67e8f9;display:block;margin-top:15px;padding:10px;background:#0f172a;border-radius:8px;text-decoration:none}
+.hidden{display:none}
 </style>
 </head>
 <body>
 <div class="wrap">
+
 <header>
-<h1>🇨🇳 CN-KH AI 🇰🇭</h1>
+<h1>🇨🇳 CN-KH AI PRO 🇰🇭</h1>
 <p>កម្មវិធីបកប្រែវីដេអូចិនទៅខ្មែរ</p>
 <small>Chinese → Khmer Video Translation</small>
 </header>
@@ -40,117 +42,238 @@ a{color:#67e8f9;display:inline-block;margin-top:12px}
 
 <div class="card">
 <h3>🌐 ២. ភ្ជាប់ Server</h3>
-<input id="api" type="url" placeholder="https://your-server.onrender.com">
-<small>បញ្ចូល URL Server របស់ CN-KH AI</small>
+<input id="api" type="url"
+placeholder="https://your-server.onrender.com">
+<small>បញ្ចូល URL Server Render របស់អ្នក</small>
 </div>
 
 <div class="card">
 <h3>🚀 ៣. ចាប់ផ្តើមបកប្រែ</h3>
-<button id="start">ចាប់ផ្តើមបកប្រែវីដេអូ</button>
+<button id="start">🚀 ចាប់ផ្តើមបកប្រែវីដេអូ</button>
 <div class="progress"><div id="bar" class="bar"></div></div>
-<p id="percent">0%</p>
+<h2 id="percent">0%</h2>
 <p id="status">រង់ចាំវីដេអូ...</p>
 </div>
 
 <div class="card">
 <h3>🇰🇭 ៤. លទ្ធផលបកប្រែខ្មែរ</h3>
-<div id="transcript" class="output">លទ្ធផលនឹងបង្ហាញនៅទីនេះ។</div>
-<a id="audioLink" hidden download="CN-KH-Khmer-Audio.mp3">⬇️ ទាញយកសំឡេងខ្មែរ MP3</a>
+<div id="transcript" class="output">
+លទ្ធផលនឹងបង្ហាញនៅទីនេះ។
+</div>
+
+<h3>🎬 វីដេអូ MP4 បកប្រែរួច</h3>
+<video id="resultVideo" controls hidden></video>
+
+<a id="videoLink" hidden download="CN-KH-Translated.mp4">
+⬇️ ទាញយកវីដេអូ MP4
+</a>
+
+<a id="audioLink" hidden download="CN-KH-Audio.mp3">
+⬇️ ទាញយកសំឡេងខ្មែរ MP3
+</a>
+
+<a id="srtLink" hidden download="CN-KH-Subtitles.srt">
+⬇️ ទាញយកអក្សរខ្មែរ SRT
+</a>
 </div>
 
 <div class="card">
 <h3>📝 ៥. បកប្រែអត្ថបទចិន</h3>
-<textarea id="source" placeholder="បញ្ចូលអត្ថបទភាសាចិន..."></textarea>
-<button id="translateText">បកប្រែទៅខ្មែរ</button>
-<div id="textResult" class="output">លទ្ធផលបកប្រែ...</div>
+<textarea id="source" rows="5"
+placeholder="បញ្ចូលអត្ថបទភាសាចិន..."></textarea>
+<button id="translateText">🌐 បកប្រែទៅខ្មែរ</button>
+<div id="textResult" class="output">
+លទ្ធផលបកប្រែ...
 </div>
+</div>
+
+<div class="card">
+<h3>ℹ️ CN-KH AI PRO</h3>
+<p>🇰🇭 Chinese to Khmer Video Translation</p>
+<p class="muted">MP4 • MP3 • SRT • Khmer Subtitle</p>
+</div>
+
 </div>
 
 <script>
-const $=id=>document.getElementById(id);
-let selected=null,poll=null;
+const $ = id => document.getElementById(id);
+
+let selected = null;
+let poll = null;
+let resultUrl = null;
 
 $('video').addEventListener('change',()=>{
- selected=$('video').files[0];
- if(!selected)return;
- $('fileInfo').textContent=selected.name+' • '+(selected.size/1048576).toFixed(1)+' MB';
- $('preview').src=URL.createObjectURL(selected);
- $('preview').hidden=false;
+ selected = $('video').files[0];
+ if(!selected) return;
+
+ $('fileInfo').textContent =
+ selected.name+' • '+(selected.size/1048576).toFixed(2)+' MB';
+
+ $('preview').src = URL.createObjectURL(selected);
+ $('preview').hidden = false;
 });
 
 function progress(p,message){
- p=Math.max(0,Math.min(100,Number(p)||0));
- $('bar').style.width=p+'%';
- $('percent').textContent=Math.round(p)+'%';
- $('status').textContent=message||'កំពុងដំណើរការ...';
+ p = Math.max(0,Math.min(100,Number(p)||0));
+ $('bar').style.width = p+'%';
+ $('percent').textContent = Math.round(p)+'%';
+ $('status').textContent = message || 'កំពុងដំណើរការ...';
 }
 
-$('start').onclick=async()=>{
- if(!selected){alert('សូមជ្រើសរើសវីដេអូជាមុន');return;}
- const base=$('api').value.trim().replace(/\/+$/,'');
- if(!/^https?:\/\//i.test(base)){alert('សូមបញ្ចូល Server URL ជាមុន');return;}
+function getServer(){
+ return $('api').value.trim().replace(/\/+$/,'');
+}
 
- $('start').disabled=true;
- $('transcript').textContent='កំពុងផ្ញើវីដេអូទៅ Server...';
- $('audioLink').hidden=true;
+function resetResults(){
+ $('videoLink').hidden = true;
+ $('audioLink').hidden = true;
+ $('srtLink').hidden = true;
+ $('resultVideo').hidden = true;
+
+ if(resultUrl){
+   URL.revokeObjectURL(resultUrl);
+   resultUrl = null;
+ }
+}
+
+$('start').onclick = async()=>{
+ if(poll) clearInterval(poll);
+
+ if(!selected){
+   alert('សូមជ្រើសរើសវីដេអូជាមុន');
+   return;
+ }
+
+ const base = getServer();
+
+ if(!/^https?:\/\//i.test(base)){
+   alert('សូមបញ្ចូល Server URL ជាមុន');
+   return;
+ }
+
+ $('start').disabled = true;
+ resetResults();
+
+ $('transcript').textContent = 'កំពុងផ្ញើវីដេអូទៅ Server...';
  progress(2,'កំពុងផ្ញើវីដេអូ...');
 
  try{
-  const fd=new FormData();
-  fd.append('file',selected);
-  const r=await fetch(base+'/jobs',{method:'POST',body:fd});
-  const data=await r.json();
-  if(!r.ok)throw new Error(data.detail||'Upload failed');
+   const fd = new FormData();
+   fd.append('file',selected);
 
-  progress(5,'បានទទួលវីដេអូ។ កំពុងដំណើរការ...');
-  poll=setInterval(async()=>{
-   try{
-    const q=await fetch(base+'/jobs/'+data.id);
-    const d=await q.json();
-    if(!q.ok)throw new Error(d.detail||'Status error');
-    progress(d.progress,d.message);
+   const r = await fetch(base+'/jobs',{
+     method:'POST',
+     body:fd
+   });
 
-    if(d.status==='completed'){
-     clearInterval(poll);
-     $('transcript').textContent=d.transcript||'មិនមានអត្ថបទ';
-     $('audioLink').href=base+'/jobs/'+data.id+'/audio';
-     $('audioLink').hidden=false;
-     $('start').disabled=false;
-    }
-    if(d.status==='failed'){
-     clearInterval(poll);
-     $('transcript').textContent=d.error||'ការបកប្រែបរាជ័យ';
-     $('start').disabled=false;
-    }
-   }catch(e){
-    clearInterval(poll);
-    progress(0,e.message);
-    $('start').disabled=false;
-   }
-  },3000);
+   const data = await r.json();
+
+   if(!r.ok) throw new Error(data.detail || 'Upload failed');
+
+   progress(5,'បានទទួលវីដេអូ។ កំពុងដំណើរការ...');
+
+   let checking = false;
+
+   poll = setInterval(async()=>{
+     if(checking) return;
+     checking = true;
+
+     try{
+       const q = await fetch(base+'/jobs/'+data.id);
+       const d = await q.json();
+
+       if(!q.ok) throw new Error(d.detail || 'Status error');
+
+       progress(d.progress,d.message);
+
+       if(d.status === 'completed'){
+         clearInterval(poll);
+         poll = null;
+
+         $('transcript').textContent =
+           d.transcript || 'មិនមានអត្ថបទ';
+
+         const videoUrl = base+'/jobs/'+data.id+'/video';
+         const audioUrl = base+'/jobs/'+data.id+'/audio';
+         const srtUrl = base+'/jobs/'+data.id+'/subtitle';
+
+         $('resultVideo').src = videoUrl;
+         $('resultVideo').hidden = false;
+
+         $('videoLink').href = videoUrl;
+         $('audioLink').href = audioUrl;
+         $('srtLink').href = srtUrl;
+
+         $('videoLink').hidden = false;
+         $('audioLink').hidden = false;
+         $('srtLink').hidden = false;
+
+         $('status').textContent = 'បកប្រែរួចរាល់!';
+         $('start').disabled = false;
+       }
+
+       if(d.status === 'failed'){
+         clearInterval(poll);
+         poll = null;
+         $('transcript').textContent =
+           d.error || 'ការបកប្រែបរាជ័យ';
+         $('start').disabled = false;
+       }
+
+     }catch(e){
+       clearInterval(poll);
+       poll = null;
+       progress(0,'មានបញ្ហា៖ '+e.message);
+       $('start').disabled = false;
+     }finally{
+       checking = false;
+     }
+   },3000);
+
  }catch(e){
-  progress(0,'មានបញ្ហា៖ '+e.message);
-  $('start').disabled=false;
+   progress(0,'មានបញ្ហា៖ '+e.message);
+   $('start').disabled = false;
  }
 };
 
-$('translateText').onclick=async()=>{
- const t=$('source').value.trim();
- const base=$('api').value.trim().replace(/\/+$/,'');
- if(!t){$('textResult').textContent='សូមបញ្ចូលអត្ថបទចិន';return;}
- if(!base){$('textResult').textContent='សូមបញ្ចូល Server URL';return;}
+$('translateText').onclick = async()=>{
+ const t = $('source').value.trim();
+ const base = getServer();
+
+ if(!t){
+   $('textResult').textContent='សូមបញ្ចូលអត្ថបទចិន';
+   return;
+ }
+
+ if(!base){
+   $('textResult').textContent='សូមបញ្ចូល Server URL';
+   return;
+ }
+
  try{
-  $('textResult').textContent='កំពុងបកប្រែ...';
-  const r=await fetch(base+'/translate',{
-   method:'POST',
-   headers:{'Content-Type':'application/json'},
-   body:JSON.stringify({text:t})
-  });
-  const d=await r.json();
-  if(!r.ok)throw new Error(d.detail||'Translation failed');
-  $('textResult').textContent=d.translation;
+   $('translateText').disabled = true;
+   $('textResult').textContent='កំពុងបកប្រែ...';
+
+   const r = await fetch(base+'/translate',{
+     method:'POST',
+     headers:{'Content-Type':'application/json'},
+     body:JSON.stringify({
+       text:t,
+       source_lang:'Chinese',
+       target_lang:'Khmer'
+     })
+   });
+
+   const d = await r.json();
+
+   if(!r.ok) throw new Error(d.detail || 'Translation failed');
+
+   $('textResult').textContent = d.translation;
+
  }catch(e){
-  $('textResult').textContent='បកប្រែមិនបាន៖ '+e.message;
+   $('textResult').textContent='បកប្រែមិនបាន៖ '+e.message;
+ }finally{
+   $('translateText').disabled = false;
  }
 };
 </script>
